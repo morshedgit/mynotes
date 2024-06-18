@@ -11,13 +11,11 @@ const Pad = () => {
   const { addNote, updateNote, notes } = useNotesStore();
 
   const handleInput = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    console.log(e.target.value);
     updateNote(noteId, e.target.value);
   };
 
   useEffect(() => {
     if (notes[noteId]) return;
-    console.log("Resetting");
     addNote(noteId, "");
   }, []);
   return (

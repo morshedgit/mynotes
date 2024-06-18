@@ -1,4 +1,5 @@
 import create from "zustand";
+import { persist } from "zustand/middleware";
 
 // Define the type for a note
 interface Note {
@@ -14,26 +15,37 @@ interface NotesState {
   deleteNote: (id: string) => void;
 }
 
-// Create the Zustand store
-const useNotesStore = create<NotesState>((set) => ({
-  notes: {},
-  addNote: (id, text) =>
-    set((state) => ({
-      notes: { ...state.notes, [id]: { id, text } },
-    })),
-  updateNote: (id, text) =>
-    set((state) => ({
-      ...state.notes,
-      [id]: {
-        id,
-        text,
+// Create the Zustand store with persistence
+const useNotesStore = create<NotesState>()(
+  persist(
+    (set) => ({
+      notes: {},
+      addNote: (id, text) =>
+        set((state) => ({
+          notes: { ...state.notes, [id]: { id, text } },
+        })),
+      updateNote: (id, text) => {
+        set((state) => ({
+          notes: {
+            ...state.notes,
+            [id]: {
+              id,
+              text,
+            },
+          },
+        }));
       },
-    })),
-  deleteNote: (id) =>
-    set((state) => {
-      const { [id]: _, ...newNotes } = state.notes;
-      return { notes: newNotes };
+      deleteNote: (id) =>
+        set((state) => {
+          const { [id]: _, ...newNotes } = state.notes;
+          return { notes: newNotes };
+        }),
     }),
-}));
+    {
+      name: "notes-storage", // name of the item in the storage (must be unique)
+      getStorage: () => localStorage, // (optional) by default, 'localStorage' is used
+    }
+  )
+);
 
 export default useNotesStore;
